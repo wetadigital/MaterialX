@@ -1,0 +1,107 @@
+habitat: 1.0
+
+Settings:
+  Name: materialx
+  InstallIncludesDebug: false
+  DefaultVariant: VP21
+
+#Variables:
+#  # when branched for a release tag, update these
+#  USD_TAG_VERSION: "22.05"
+#  USD_VERSION: "22.05"
+#  USD_CODESAFE_VERSION: "22_05"
+#  USD_APP_VERSION: "${VERSION}"
+#  USD_SOVERSION: !Sub "${USD_TAG_VERSION}"
+#  USD_FULLSOVERSION: !Sub "0.${USD_APP_VERSION}"
+
+#materialx_pak:
+#  Type: Weta::OZ::SimplePak
+#  PakNameOverride: materialx
+#  PakVariables:
+#    LD_LIBRARY_PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
+#    PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
+#    PYTHONPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
+#  Library: materialx
+#  Requires:
+#    libboost: ">=1.66"
+#    python: ">=2.7<3.11"
+#    pyopengl: ">=3.0.2<4"
+#    pyjinja2: ">=2.11.2"
+#    pyside: !MinMax ["2.0.0", "2-5.*.*"]
+#    pytyping: ">=3.7.4.1-weta.1<4"
+#    pyqt: ">=5.6.0<5.16"
+#    WetaVFXPlatform: ">=2019<2022"
+#    weta.runtime: ">=1.21.1"
+#    prman: !Soft ">=24.2.2199188<25"
+
+compile_materialx:
+  Type: Weta::OSS::CmakePackage
+  VariantsOverride: [ VP21, VP22 ]
+  BaseEnvironment:
+    - cmake-3.21.3
+    - ninja-1.10.2
+    - patchelf-0.13.0
+    - bison-3.8.2
+    - libflex-2.6.4
+    - doxygen-1.9.1
+    - graphviz-2.38.0
+    - texlive-2018.04.14
+    - prman-24.2.2199188
+  PerVariantBuildEnvironments:
+    VP21*:
+      - python-3.7.3-weta.1
+      - pyimportlib_metadata-4.8.1
+      - pytyping-3.7.4.1-weta.1
+      - WetaVFXPlatform-2021.37.0
+    VP22*:
+      - python-3.9.10-weta.1
+      - pyimportlib_metadata-5.1.0-py39.1
+      - pytyping-3.7.4.1-weta.2
+      - WetaVFXPlatform-2022.0.2
+  PerVariantVariables:
+    VP21*:
+      BOB_ABI: L94
+      OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
+    VP21:
+      BLDTAG: opt
+      DBG_EXT: ""
+      GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
+    VP21DBG:
+      BLDTAG: dbg
+      DBG_EXT: ""
+      GENDOCS: OFF
+    VP22*:
+      BOB_ABI: L94
+      OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
+    VP22:
+      BLDTAG: opt
+      DBG_EXT: ""
+      GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
+    VP22DBG:
+      BLDTAG: dbg
+      DBG_EXT: ""
+      GENDOCS: OFF
+  ExtraConfigureArgs: !Sub |
+    -DCMAKE_CXX_STANDARD=${Variant:C++Version}
+    -DMATERIALX_BUILD_JS=OFF
+    -DMATERIALX_BUILD_PYTHON=ON
+    -DMATERIALX_BUILD_VIEWER=OFF
+    -DMATERIALX_BUILD_GEN_GLSL=ON
+    -DMATERIALX_BUILD_GEN_OSL=ON
+    -DMATERIALX_BUILD_GEN_MDL=ON
+    -DMATERIALX_BUILD_GEN_MSL=ON
+    -DMATERIALX_BUILD_GRAPH_EDITOR=OFF
+    -DMATERIALX_BUILD_DOCS=${GENDOCS}
+    -DMATERIALX_BUILD_RENDER=OFF
+    -DMATERIALX_BUILD_OIIO=OFF
+    -DMATERIALX_BUILD_TESTS=OFF
+    -DMATERIALX_BUILD_SHARED_LIBS=ON
+    -DMATERIALX_PYTHON_LTO=OFF
+    -DMATERIALX_INSTALL_PYTHON=ON
+    -DMATERIALX_TEST_RENDER=OFF
+    -DMATERIALX_WARNINGS_AS_ERRORS=OFF
+    -DMATERIALX_DYNAMIC_ANALYSIS=OFF
+    -DMATERIALX_OSL_LEGACY_CLOSURES=ON
+    -DMATERIALX_PYTHON_VERSION=${{PYTHONVERSION}}
+    -DMATERIALX_PYTHON_EXECUTABLE=${{WETA_PYTHON_LOCATION}}/bin/python
+    -DMATERIALX_OIIO_DIR=${OIIO_LOCATION}
