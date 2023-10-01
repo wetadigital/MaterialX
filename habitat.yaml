@@ -5,38 +5,35 @@ Settings:
   InstallIncludesDebug: false
   DefaultVariant: VP21
 
-#Variables:
-#  # when branched for a release tag, update these
-#  USD_TAG_VERSION: "22.05"
-#  USD_VERSION: "22.05"
-#  USD_CODESAFE_VERSION: "22_05"
-#  USD_APP_VERSION: "${VERSION}"
-#  USD_SOVERSION: !Sub "${USD_TAG_VERSION}"
-#  USD_FULLSOVERSION: !Sub "0.${USD_APP_VERSION}"
+Variables:
+  # when branched for a release tag, update these
+  MATERIALX_TAG_VERSION: "1.38.7"
+  MATERIALX_VERSION: "1.38.7"
+  MATERIALX_CODESAFE_VERSION: "1_38_7"
+  MATERIALX_APP_VERSION: "${VERSION}"
+  MATERIALX_SOVERSION: !Sub "${MATERIALX_TAG_VERSION}"
+  MATERIALX_FULLSOVERSION: ${MATERIALX_APP_VERSION}
 
-#materialx_pak:
-#  Type: Weta::OZ::SimplePak
-#  PakNameOverride: materialx
-#  PakVariables:
-#    LD_LIBRARY_PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
-#    PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
-#    PYTHONPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
-#  Library: materialx
-#  Requires:
-#    libboost: ">=1.66"
-#    python: ">=2.7<3.11"
-#    pyopengl: ">=3.0.2<4"
-#    pyjinja2: ">=2.11.2"
-#    pyside: !MinMax ["2.0.0", "2-5.*.*"]
-#    pytyping: ">=3.7.4.1-weta.1<4"
-#    pyqt: ">=5.6.0<5.16"
-#    WetaVFXPlatform: ">=2019<2022"
-#    weta.runtime: ">=1.21.1"
-#    prman: !Soft ">=24.2.2199188<25"
+materialx_pak:
+  Type: Weta::OZ::SimplePak
+  PakNameOverride: materialx
+  PakVariables:
+    LD_LIBRARY_PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
+    PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
+    PYTHONPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
+  Library: materialx
+  DeveloperVariables:
+    LIBMATERIALX_LIBPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
+    LIBMATERIALX_INCLUDES: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/include"
+  Requires:
+    python: ">=2.7<3.11"
+    WetaVFXPlatform: ">=2019<2023"
+    weta.runtime: ">=1.23.50"
+
 
 compile_materialx:
   Type: Weta::OSS::CmakePackage
-  VariantsOverride: [ VP21, VP22 ]
+  VariantsOverride: [ VP19, VP19DBG, VP20py2, VP20py2DBG, VP21, VP21DBG, VP22, VP22DBG ]
   BaseEnvironment:
     - cmake-3.21.3
     - ninja-1.10.2
@@ -46,19 +43,44 @@ compile_materialx:
     - doxygen-1.9.1
     - graphviz-2.38.0
     - texlive-2018.04.14
-    - prman-24.2.2199188
   PerVariantBuildEnvironments:
+    VP19*:
+      - python-2.7.15
+      - WetaVFXPlatform-2019.27.1
+    VP20*:
+      - python-2.7.15
+      - WetaVFXPlatform-2020.27.1
     VP21*:
       - python-3.7.3-weta.1
       - pyimportlib_metadata-4.8.1
-      - pytyping-3.7.4.1-weta.1
-      - WetaVFXPlatform-2021.37.0
+      - WetaVFXPlatform-2021.37.5
     VP22*:
       - python-3.9.10-weta.1
       - pyimportlib_metadata-5.1.0-py39.1
-      - pytyping-3.7.4.1-weta.2
       - WetaVFXPlatform-2022.0.2
   PerVariantVariables:
+    VP19*:
+      BOB_ABI: L64
+      OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
+    VP19:
+      BLDTAG: opt
+      DBG_EXT: ""
+      GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
+    VP19DBG:
+      BLDTAG: dbg
+      DBG_EXT: ""
+      GENDOCS: OFF
+    VP20*:
+      BOB_ABI: L64
+      OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
+    VP20py2:
+      BLDTAG: opt
+      DBG_EXT: ""
+      GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
+    VP20py2DBG:
+      BLDTAG: dbg
+      DBG_EXT: ""
+      GENDOCS: OFF
     VP21*:
       BOB_ABI: L94
       OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
@@ -94,7 +116,7 @@ compile_materialx:
     -DMATERIALX_BUILD_DOCS=${GENDOCS}
     -DMATERIALX_BUILD_RENDER=OFF
     -DMATERIALX_BUILD_OIIO=OFF
-    -DMATERIALX_BUILD_TESTS=OFF
+    -DMATERIALX_BUILD_TESTS=ON
     -DMATERIALX_BUILD_SHARED_LIBS=ON
     -DMATERIALX_PYTHON_LTO=OFF
     -DMATERIALX_INSTALL_PYTHON=ON
