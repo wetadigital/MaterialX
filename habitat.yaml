@@ -18,9 +18,9 @@ materialx_pak:
   Type: Weta::OZ::SimplePak
   PakNameOverride: materialx
   PakVariables:
-    LD_LIBRARY_PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
-    PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
-    PYTHONPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
+    LD_LIBRARY_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
+    PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
+    PYTHONPATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
   Library: materialx
   DeveloperVariables:
     LIBMATERIALX_LIBPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
