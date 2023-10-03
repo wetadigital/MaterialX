@@ -2,7 +2,7 @@ habitat: 1.0
 
 Settings:
   Name: materialx
-  InstallIncludesDebug: false
+  InstallIncludesDebug: true
   DefaultVariant: VP21
 
 Variables:
@@ -18,13 +18,14 @@ materialx_pak:
   Type: Weta::OZ::SimplePak
   PakNameOverride: materialx
   PakVariables:
-    LD_LIBRARY_PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
-    PATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
-    PYTHONPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
+    LD_LIBRARY_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
+    PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
+    PYTHONPATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
   Library: materialx
   DeveloperVariables:
     LIBMATERIALX_LIBPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
     LIBMATERIALX_INCLUDES: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/include"
+    CMAKE_PREFIX_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/cmake/MaterialX"
   Requires:
     python: ">=2.7<3.11"
     WetaVFXPlatform: ">=2019<2023"
@@ -64,44 +65,36 @@ compile_materialx:
       OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
     VP19:
       BLDTAG: opt
-      DBG_EXT: ""
       GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
     VP19DBG:
       BLDTAG: dbg
-      DBG_EXT: ""
       GENDOCS: OFF
     VP20*:
       BOB_ABI: L64
       OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
     VP20py2:
       BLDTAG: opt
-      DBG_EXT: ""
       GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
     VP20py2DBG:
       BLDTAG: dbg
-      DBG_EXT: ""
       GENDOCS: OFF
     VP21*:
       BOB_ABI: L94
       OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
     VP21:
       BLDTAG: opt
-      DBG_EXT: ""
       GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
     VP21DBG:
       BLDTAG: dbg
-      DBG_EXT: ""
       GENDOCS: OFF
     VP22*:
       BOB_ABI: L94
       OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
     VP22:
       BLDTAG: opt
-      DBG_EXT: ""
       GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
     VP22DBG:
       BLDTAG: dbg
-      DBG_EXT: ""
       GENDOCS: OFF
   ExtraConfigureArgs: !Sub |
     -DCMAKE_CXX_STANDARD=${Variant:C++Version}
@@ -114,13 +107,13 @@ compile_materialx:
     -DMATERIALX_BUILD_GEN_MSL=ON
     -DMATERIALX_BUILD_GRAPH_EDITOR=OFF
     -DMATERIALX_BUILD_DOCS=${GENDOCS}
-    -DMATERIALX_BUILD_RENDER=OFF
+    -DMATERIALX_BUILD_RENDER=ON
     -DMATERIALX_BUILD_OIIO=OFF
     -DMATERIALX_BUILD_TESTS=ON
     -DMATERIALX_BUILD_SHARED_LIBS=ON
     -DMATERIALX_PYTHON_LTO=OFF
     -DMATERIALX_INSTALL_PYTHON=ON
-    -DMATERIALX_TEST_RENDER=OFF
+    -DMATERIALX_TEST_RENDER=ON
     -DMATERIALX_WARNINGS_AS_ERRORS=OFF
     -DMATERIALX_DYNAMIC_ANALYSIS=OFF
     -DMATERIALX_OSL_LEGACY_CLOSURES=ON
