@@ -20,16 +20,14 @@ materialx_pak:
   PakVariables:
     LD_LIBRARY_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
     PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
-    PYTHONPATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"
+    PYTHONPATH: !AppendFor ['python', "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"]
   Library: materialx
   DeveloperVariables:
     LIBMATERIALX_LIBPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
     LIBMATERIALX_INCLUDES: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/include"
     CMAKE_PREFIX_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/cmake/MaterialX"
   Requires:
-    python: ">=2.7<3.11"
     WetaVFXPlatform: ">=2019<2023"
-    weta.runtime: ">=1.23.50"
 
 
 compile_materialx:
