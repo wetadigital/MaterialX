@@ -18,14 +18,14 @@ materialx_pak:
   Type: Weta::OZ::SimplePak
   PakNameOverride: materialx
   PakVariables:
-    LD_LIBRARY_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
-    PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/bin"
-    PYTHONPATH: !AppendFor ['python', "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/python"]
+    LD_LIBRARY_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/lib"
+    PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/bin"
+    PYTHONPATH: !AppendFor ['python', "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/lib/python"]
   Library: materialx
   DeveloperVariables:
-    LIBMATERIALX_LIBPATH: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib"
-    LIBMATERIALX_INCLUDES: "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/include"
-    CMAKE_PREFIX_PATH: !Append "${INSTALL_PREFIX}/opt/%(WETA_DEFAULT_VFXPLATFORM_ID)s/lib/cmake/MaterialX"
+    LIBMATERIALX_LIBPATH: "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/lib"
+    LIBMATERIALX_INCLUDES: "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/include"
+    MaterialX_ROOT: !Append "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/lib/cmake/MaterialX"
   Requires:
     WetaVFXPlatform: ">=2019<2023"
 
@@ -44,19 +44,19 @@ compile_materialx:
     - texlive-2018.04.14
   PerVariantBuildEnvironments:
     VP19*:
-      - python-2.7.15
-      - WetaVFXPlatform-2019.27.1
+      - python-2.7.15-weta.5
+      - WetaVFXPlatform-2019.27.10
     VP20*:
-      - python-2.7.15
-      - WetaVFXPlatform-2020.27.1
+      - python-2.7.15-weta.5
+      - WetaVFXPlatform-2020.27.8
     VP21*:
       - python-3.7.3-weta.1
       - pyimportlib_metadata-4.8.1
-      - WetaVFXPlatform-2021.37.5
+      - WetaVFXPlatform-2021.37.10
     VP22*:
       - python-3.9.10-weta.1
       - pyimportlib_metadata-5.1.0-py39.1
-      - WetaVFXPlatform-2022.0.2
+      - WetaVFXPlatform-2022.0.13
   PerVariantVariables:
     VP19*:
       BOB_ABI: L64
