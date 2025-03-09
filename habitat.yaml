@@ -27,12 +27,12 @@ materialx_pak:
     LIBMATERIALX_INCLUDES: "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/include"
     MaterialX_ROOT: !Append "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/lib/cmake/MaterialX"
   Requires:
-    WetaVFXPlatform: ">=2019<2023"
+    WetaVFXPlatform: ">=2019<2024"
 
 
 compile_materialx:
   Type: Weta::OSS::CmakePackage
-  VariantsOverride: [ VP19, VP19DBG, VP20py2, VP20py2DBG, VP21, VP21DBG, VP22, VP22DBG ]
+  VariantsOverride: [ VP19, VP19DBG, VP20py2, VP20py2DBG, VP21, VP21DBG, VP22, VP22DBG, VP23, VP23DBG ]
   BaseEnvironment:
     - cmake-3.21.3
     - ninja-1.10.2
@@ -57,6 +57,9 @@ compile_materialx:
       - python-3.9.10-weta.1
       - pyimportlib_metadata-5.1.0-py39.1
       - WetaVFXPlatform-2022.0.13
+    VP23*:
+      - python-3.10.13
+      - WetaVFXPlatform-2023.0.4
   PerVariantVariables:
     VP19*:
       BOB_ABI: L64
@@ -92,6 +95,15 @@ compile_materialx:
       BLDTAG: opt
       GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
     VP22DBG:
+      BLDTAG: dbg
+      GENDOCS: OFF
+    VP23*:
+      BOB_ABI: L171
+      OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta12"
+    VP23:
+      BLDTAG: opt
+      GENDOCS: !If [ !Equals [ !Sub "${Project:IsDeployment}", "True" ], "ON", "OFF" ]
+    VP23DBG:
       BLDTAG: dbg
       GENDOCS: OFF
   ExtraConfigureArgs: !Sub |
