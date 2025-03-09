@@ -34,7 +34,7 @@ compile_materialx:
   Type: Weta::OSS::CmakePackage
   VariantsOverride: [ VP19, VP19DBG, VP20py2, VP20py2DBG, VP21, VP21DBG, VP22, VP22DBG, VP23, VP23DBG ]
   BaseEnvironment:
-    - cmake-3.21.3
+    - cmake-3.27.7
     - ninja-1.10.2
     - patchelf-0.13.0
     - bison-3.8.2
