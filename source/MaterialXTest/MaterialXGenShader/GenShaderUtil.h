@@ -52,6 +52,9 @@ void checkImplementations(mx::GenContext& context,
 // Utility test to  check unique name generation on a shader generator
 void testUniqueNames(mx::GenContext& context, const std::string& stage);
 
+// Utility to perfrom simple performance test to load, validate and generate shaders
+void shaderGenPerformanceTest(mx::GenContext& context);
+
 //
 // Render validation options. Reflects the _options.mtlx
 // file in the test suite area.
@@ -128,16 +131,6 @@ class TestSuiteOptions
     // Enable reference quality rendering. Default is false.
     bool enableReferenceQuality;
 
-    // Wedge parameters
-    struct WedgeSetting
-    {
-        std::string wedgeFile;
-        std::string parameter;
-        mx::Vector2 range;
-        int steps;
-    };
-    std::vector <WedgeSetting> wedgeSettings;
-    
     // Bake parameters
     struct BakeSetting
     {
@@ -156,13 +149,11 @@ class ShaderGeneratorTester
 {
   public:
     ShaderGeneratorTester(mx::ShaderGeneratorPtr shaderGenerator, const mx::FilePathVec& testRootPaths, 
-                            const mx::FilePath& libSearchPath, const mx::FileSearchPath& srcSearchPath, 
-                            const mx::FilePath& logFilePath, bool writeShadersToDisk) :
+                          const mx::FileSearchPath& searchPath, const mx::FilePath& logFilePath, bool writeShadersToDisk) :
         _shaderGenerator(shaderGenerator),
         _targetString(shaderGenerator ? shaderGenerator->getTarget() : "NULL"),
         _testRootPaths(testRootPaths),
-        _libSearchPath(libSearchPath),
-        _srcSearchPath(srcSearchPath),
+        _searchPath(searchPath),
         _logFilePath(logFilePath),
         _writeShadersToDisk(writeShadersToDisk)
     {
@@ -182,13 +173,13 @@ class ShaderGeneratorTester
     virtual void setTestStages() = 0;
 
     // Add files in to not examine
-    virtual void addSkipFiles();
+    virtual void addSkipFiles() { };
 
     // Add nodedefs to not examine
-    virtual void addSkipNodeDefs();
+    virtual void addSkipNodeDefs() { };
 
     // Add files to be skipped while loading libraries
-    virtual void addSkipLibraryFiles();
+    virtual void addSkipLibraryFiles() { };
 
     // Add color management
     virtual void addColorManagement();
@@ -251,8 +242,7 @@ class ShaderGeneratorTester
     mx::DocumentPtr _dependLib;
 
     const mx::FilePathVec _testRootPaths;
-    const mx::FileSearchPath _libSearchPath;
-    const mx::FileSearchPath _srcSearchPath;
+    const mx::FileSearchPath _searchPath;
     const mx::FilePath _logFilePath;
     bool _writeShadersToDisk;
 
@@ -270,8 +260,6 @@ class ShaderGeneratorTester
     std::unordered_map<std::string, mx::GenUserDataPtr> _userData;
     mx::StringSet _usedImplementations;
 };
-
-
 
 } // namespace GenShaderUtil
 

@@ -19,10 +19,14 @@ void bindPyOiioImageLoader(py::module& mod);
 void bindPyTinyObjLoader(py::module& mod);
 void bindPyCamera(py::module& mod);
 void bindPyShaderRenderer(py::module& mod);
+void bindPyCgltfLoader(py::module& mod);
 
 PYBIND11_MODULE(PyMaterialXRender, mod)
 {
     mod.doc() = "Module containing Python bindings for the MaterialXRender library";
+
+    // PyMaterialXRender depends on types defined in PyMaterialXCore
+    PYMATERIALX_IMPORT_MODULE(PyMaterialXCore);
 
     bindPyMesh(mod);
     bindPyGeometryHandler(mod);
@@ -36,4 +40,5 @@ PYBIND11_MODULE(PyMaterialXRender, mod)
     bindPyTinyObjLoader(mod);
     bindPyCamera(mod);
     bindPyShaderRenderer(mod);
+    bindPyCgltfLoader(mod);
 }

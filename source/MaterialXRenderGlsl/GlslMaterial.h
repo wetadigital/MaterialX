@@ -24,7 +24,8 @@ using GlslMaterialPtr = std::shared_ptr<class GlslMaterial>;
 class MX_RENDERGLSL_API GlslMaterial : public ShaderMaterial
 {
   public:
-    GlslMaterial() : ShaderMaterial()
+    GlslMaterial() :
+        ShaderMaterial()
     {
     }
     ~GlslMaterial() { }
@@ -45,7 +46,7 @@ class MX_RENDERGLSL_API GlslMaterial : public ShaderMaterial
 
     /// Generate a shader from the given hardware shader.
     bool generateShader(ShaderPtr hwShader) override;
-    
+
     /// Copy shader from one material to this one
     void copyShader(MaterialPtr material) override
     {
@@ -83,10 +84,6 @@ class MX_RENDERGLSL_API GlslMaterial : public ShaderMaterial
     void bindLighting(LightHandlerPtr lightHandler,
                       ImageHandlerPtr imageHandler,
                       const ShadowState& shadowState) override;
-
-    /// Bind units.
-    void bindUnits(UnitConverterRegistryPtr& registry,
-                   const GenContext& context) override;
 
     /// Bind the given mesh to this material.
     void bindMesh(MeshPtr mesh) override;

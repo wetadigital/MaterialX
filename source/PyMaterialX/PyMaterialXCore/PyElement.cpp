@@ -124,6 +124,7 @@ void bindPyElement(py::module& mod)
         .def("setType", &mx::TypedElement::setType)
         .def("hasType", &mx::TypedElement::hasType)
         .def("getType", &mx::TypedElement::getType)
+        .def("isColorType", &mx::TypedElement::isColorType)
         .def("isMultiOutputType", &mx::TypedElement::isMultiOutputType)
         .def("getTypeDef", &mx::TypedElement::getTypeDef)
         .def_readonly_static("TYPE_ATTRIBUTE", &mx::TypedElement::TYPE_ATTRIBUTE);
@@ -188,6 +189,9 @@ void bindPyElement(py::module& mod)
 
     py::class_<mx::CommentElement, mx::CommentElementPtr, mx::Element>(mod, "CommentElement")
         .def_readonly_static("CATEGORY", &mx::CommentElement::CATEGORY);
+
+    py::class_<mx::NewlineElement, mx::NewlineElementPtr, mx::Element>(mod, "NewlineElement")
+        .def_readonly_static("CATEGORY", &mx::NewlineElement::CATEGORY);
 
     py::class_<mx::GenericElement, mx::GenericElementPtr, mx::Element>(mod, "GenericElement")
         .def_readonly_static("CATEGORY", &mx::GenericElement::CATEGORY);

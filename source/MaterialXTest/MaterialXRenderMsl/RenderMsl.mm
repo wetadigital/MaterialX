@@ -17,7 +17,6 @@
 #endif
 
 #include <MaterialXRenderMsl/MslRenderer.h>
-#include <MaterialXRenderMsl/TextureBaker.h>
 
 #include <cmath>
 
@@ -58,14 +57,6 @@ class MslShaderRenderTester : public RenderUtil::ShaderRenderTester
 
     bool saveImage(const mx::FilePath& filePath, mx::ConstImagePtr image, bool verticalFlip) const override;
 
-    bool canBake() const override
-    {
-        return true;
-    }
-
-    void runBake(mx::DocumentPtr doc, const mx::FileSearchPath& imageSearchPath, const mx::FilePath& outputFilename,
-                 const GenShaderUtil::TestSuiteOptions::BakeSetting& bakeOptions, std::ostream& log) override;
-
     mx::MslRendererPtr _renderer;
     mx::LightHandlerPtr _lightHandler;
     id<MTLDevice> _device;
@@ -78,7 +69,7 @@ class MslShaderRenderTester : public RenderUtil::ShaderRenderTester
 void MslShaderRenderTester::loadAdditionalLibraries(mx::DocumentPtr document,
                                                      GenShaderUtil::TestSuiteOptions& options)
 {
-    mx::FilePath lightDir = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Materials/TestSuite/lights");
+    mx::FilePath lightDir = mx::getDefaultDataSearchPath().find("resources/Materials/TestSuite/lights");
     for (const auto& lightFile : options.lightFiles)
     {
         loadLibrary(lightDir / mx::FilePath(lightFile), document);
@@ -135,6 +126,7 @@ void MslShaderRenderTester::createRenderer(std::ostream& log)
         mx::StbImageLoaderPtr stbLoader = mx::StbImageLoader::create();
         mx::ImageHandlerPtr imageHandler =
             _renderer->createImageHandler(stbLoader);
+        imageHandler->setSearchPath(mx::getDefaultDataSearchPath());
 #if defined(MATERIALX_BUILD_OIIO)
         mx::OiioImageLoaderPtr oiioLoader = mx::OiioImageLoader::create();
         imageHandler->addLoader(oiioLoader);
@@ -179,6 +171,7 @@ bool MslShaderRenderTester::runRenderer(const std::string& shaderName,
     std::cout << "Validating MSL rendering for: " << doc->getSourceUri() << std::endl;
 
     mx::ScopedTimer totalMSLTime(&profileTimes.languageTimes.totalTime);
+    mx::FileSearchPath searchPath = mx::getDefaultDataSearchPath();
 
     const mx::ShaderGenerator& shadergen = context.getShaderGenerator();
 
@@ -277,7 +270,7 @@ bool MslShaderRenderTester::runRenderer(const std::string& shaderName,
                 {
                     if (!testOptions.renderGeometry.isAbsolute())
                     {
-                        geomPath = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Geometry") / testOptions.renderGeometry;
+                        geomPath = searchPath.find("resources/Geometry") / testOptions.renderGeometry;
                     }
                     else
                     {
@@ -286,7 +279,7 @@ bool MslShaderRenderTester::runRenderer(const std::string& shaderName,
                 }
                 else
                 {
-                    geomPath = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Geometry/sphere.obj");
+                    geomPath = searchPath.find("resources/Geometry/sphere.obj");
                 }
 
                 if (!geomHandler->hasGeometry(geomPath))
@@ -373,7 +366,7 @@ bool MslShaderRenderTester::runRenderer(const std::string& shaderName,
                 {
                     {
                         mx::ScopedTimer renderTimer(&profileTimes.languageTimes.renderTime);
-                        _renderer->getImageHandler()->setSearchPath(imageSearchPath);
+                        _renderer->getImageHandler()->setSearchPath(mx::getDefaultDataSearchPath());
                         _renderer->setSize(static_cast<unsigned int>(testOptions.renderSize[0]), static_cast<unsigned int>(testOptions.renderSize[1]));
                         _renderer->render();
                     }
@@ -425,49 +418,12 @@ bool MslShaderRenderTester::runRenderer(const std::string& shaderName,
     return true;
 }
 
-void MslShaderRenderTester::runBake(mx::DocumentPtr doc, const mx::FileSearchPath& imageSearchPath, const mx::FilePath& outputFileName,
-                                     const GenShaderUtil::TestSuiteOptions::BakeSetting& bakeOptions, std::ostream& log)
-{
-    mx::ImageVec imageVec = _renderer->getImageHandler()->getReferencedImages(doc);
-    auto maxImageSize = mx::getMaxDimensions(imageVec);
-    const unsigned bakeWidth = std::max(bakeOptions.resolution, maxImageSize.first);
-    const unsigned bakeHeight = std::max(bakeOptions.resolution, maxImageSize.second);
-
-    mx::Image::BaseType baseType = bakeOptions.hdr ? mx::Image::BaseType::FLOAT : mx::Image::BaseType::UINT8;
-    mx::TextureBakerPtr baker = mx::TextureBakerMsl::create(bakeWidth, bakeHeight, baseType);
-    baker->setupUnitSystem(doc);
-    baker->setImageHandler(_renderer->getImageHandler());
-    baker->setOptimizeConstants(true);
-    baker->setHashImageNames(true);
-    baker->setTextureSpaceMin(bakeOptions.uvmin);
-    baker->setTextureSpaceMax(bakeOptions.uvmax);
-
-    try
-    {
-        baker->setOutputStream(&log);
-        baker->bakeAllMaterials(doc, imageSearchPath, outputFileName);
-    }
-    catch (mx::Exception& e)
-    {
-        const mx::FilePath& sourceUri = doc->getSourceUri();
-        log << sourceUri.asString() + " failed baking process: " + e.what() << std::endl;
-    }
-}
-
 TEST_CASE("Render: MSL TestSuite", "[rendermsl]")
 {
+    mx::FileSearchPath searchPath = mx::getDefaultDataSearchPath();
+    mx::FilePath optionsFilePath = searchPath.find("resources/Materials/TestSuite/_options.mtlx");
+
     MslShaderRenderTester renderTester(mx::MslShaderGenerator::create());
-
-    const mx::FilePath testRootPath = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Materials/TestSuite");
-    const mx::FilePath testRootPath2 = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Materials/Examples/StandardSurface");
-    const mx::FilePath testRootPath3 = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Materials/Examples/UsdPreviewSurface");
-    mx::FilePathVec testRootPaths;
-    testRootPaths.push_back(testRootPath);
-    testRootPaths.push_back(testRootPath2);
-    testRootPaths.push_back(testRootPath3);
-
-    mx::FilePath optionsFilePath = testRootPath / mx::FilePath("_options.mtlx");
-
     renderTester.validate(optionsFilePath);
 }
 

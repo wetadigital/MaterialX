@@ -9,7 +9,6 @@
 #include <MaterialXGenGlsl/GlslShaderGenerator.h>
 #include <MaterialXRenderGlsl/GlslRenderer.h>
 #include <MaterialXRenderGlsl/GLTextureHandler.h>
-#include <MaterialXRenderGlsl/TextureBaker.h>
 
 #include <MaterialXRender/GeometryHandler.h>
 #include <MaterialXRender/StbImageLoader.h>
@@ -54,14 +53,6 @@ class GlslShaderRenderTester : public RenderUtil::ShaderRenderTester
 
     bool saveImage(const mx::FilePath& filePath, mx::ConstImagePtr image, bool verticalFlip) const override;
 
-    bool canBake() const override
-    {
-        return true;
-    }
-
-    void runBake(mx::DocumentPtr doc, const mx::FileSearchPath& imageSearchPath, const mx::FilePath& outputFilename,
-                 const GenShaderUtil::TestSuiteOptions::BakeSetting& bakeOptions, std::ostream& log) override;
-
     mx::GlslRendererPtr _renderer;
     mx::LightHandlerPtr _lightHandler;
 };
@@ -73,7 +64,7 @@ class GlslShaderRenderTester : public RenderUtil::ShaderRenderTester
 void GlslShaderRenderTester::loadAdditionalLibraries(mx::DocumentPtr document,
                                                      GenShaderUtil::TestSuiteOptions& options)
 {
-    mx::FilePath lightDir = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Materials/TestSuite/lights");
+    mx::FilePath lightDir = mx::getDefaultDataSearchPath().find("resources/Materials/TestSuite/lights");
     for (const auto& lightFile : options.lightFiles)
     {
         loadLibrary(lightDir / mx::FilePath(lightFile), document);
@@ -128,6 +119,7 @@ void GlslShaderRenderTester::createRenderer(std::ostream& log)
         // Set image handler on renderer
         mx::StbImageLoaderPtr stbLoader = mx::StbImageLoader::create();
         mx::ImageHandlerPtr imageHandler = _renderer->createImageHandler(stbLoader);
+        imageHandler->setSearchPath(mx::getDefaultDataSearchPath());
 #if defined(MATERIALX_BUILD_OIIO)
         mx::OiioImageLoaderPtr oiioLoader = mx::OiioImageLoader::create();
         imageHandler->addLoader(oiioLoader);
@@ -174,6 +166,7 @@ bool GlslShaderRenderTester::runRenderer(const std::string& shaderName,
     mx::ScopedTimer totalGLSLTime(&profileTimes.languageTimes.totalTime);
 
     const mx::ShaderGenerator& shadergen = context.getShaderGenerator();
+    mx::FileSearchPath searchPath = mx::getDefaultDataSearchPath();
 
     // Perform validation if requested
     if (testOptions.validateElementToRender)
@@ -271,7 +264,7 @@ bool GlslShaderRenderTester::runRenderer(const std::string& shaderName,
                 {
                     if (!testOptions.renderGeometry.isAbsolute())
                     {
-                        geomPath = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Geometry") / testOptions.renderGeometry;
+                        geomPath = searchPath.find("resources/Geometry") / testOptions.renderGeometry;
                     }
                     else
                     {
@@ -280,7 +273,7 @@ bool GlslShaderRenderTester::runRenderer(const std::string& shaderName,
                 }
                 else
                 {
-                    geomPath = mx::FilePath::getCurrentPath() / mx::FilePath("resources/Geometry/sphere.obj");
+                    geomPath = searchPath.find("resources/Geometry/sphere.obj");
                 }
 
                 if (!geomHandler->hasGeometry(geomPath))
@@ -419,40 +412,11 @@ bool GlslShaderRenderTester::runRenderer(const std::string& shaderName,
     return true;
 }
 
-void GlslShaderRenderTester::runBake(mx::DocumentPtr doc, const mx::FileSearchPath& imageSearchPath, const mx::FilePath& outputFileName,
-                                     const GenShaderUtil::TestSuiteOptions::BakeSetting& bakeOptions, std::ostream& log)
-{
-    mx::ImageVec imageVec = _renderer->getImageHandler()->getReferencedImages(doc);
-    auto maxImageSize = mx::getMaxDimensions(imageVec);
-    const unsigned bakeWidth = std::max(bakeOptions.resolution, maxImageSize.first);
-    const unsigned bakeHeight = std::max(bakeOptions.resolution, maxImageSize.second);
-
-    mx::Image::BaseType baseType = bakeOptions.hdr ? mx::Image::BaseType::FLOAT : mx::Image::BaseType::UINT8;
-    mx::TextureBakerPtr baker = mx::TextureBakerGlsl::create(bakeWidth, bakeHeight, baseType);
-    baker->setupUnitSystem(doc);
-    baker->setImageHandler(_renderer->getImageHandler());
-    baker->setOptimizeConstants(true);
-    baker->setHashImageNames(true);
-    baker->setTextureSpaceMin(bakeOptions.uvmin);
-    baker->setTextureSpaceMax(bakeOptions.uvmax);
-
-    try
-    {
-        baker->setOutputStream(&log);
-        baker->bakeAllMaterials(doc, imageSearchPath, outputFileName);
-    }
-    catch (mx::Exception& e)
-    {
-        const mx::FilePath& sourceUri = doc->getSourceUri();
-        log << sourceUri.asString() + " failed baking process: " + e.what() << std::endl;
-    }
-}
-
 TEST_CASE("Render: GLSL TestSuite", "[renderglsl]")
 {
+    mx::FileSearchPath searchPath = mx::getDefaultDataSearchPath();
+    mx::FilePath optionsFilePath = searchPath.find("resources/Materials/TestSuite/_options.mtlx");
+
     GlslShaderRenderTester renderTester(mx::GlslShaderGenerator::create());
-
-    mx::FilePath optionsFilePath("resources/Materials/TestSuite/_options.mtlx");
-
     renderTester.validate(optionsFilePath);
 }

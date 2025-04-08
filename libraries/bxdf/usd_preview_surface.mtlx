@@ -9,7 +9,7 @@
   <nodedef name="ND_UsdPreviewSurface_surfaceshader" node="UsdPreviewSurface" nodegroup="pbr" doc="USD preview surface shader" version="2.3" isdefaultversion="true">
     <input name="diffuseColor" type="color3" value="0.18, 0.18, 0.18" uimin="0,0,0" uimax="1,1,1" />
     <input name="emissiveColor" type="color3" value="0, 0, 0" uimin="0,0,0" uisoftmax="1,1,1" />
-    <input name="useSpecularWorkflow" type="integer" value="0" />
+    <input name="useSpecularWorkflow" type="integer" value="0" uimin="0" uimax="1" uistep="1" />
     <input name="specularColor" type="color3" value="0, 0, 0" uimin="0,0,0" uimax="1,1,1" />
     <input name="metallic" type="float" value="0" uimin="0.0" uimax="1.0" />
     <input name="roughness" type="float" value="0.5" uimin="0.0" uimax="1.0" />
@@ -18,7 +18,7 @@
     <input name="opacity" type="float" value="1" uimin="0.0" uimax="1.0" />
     <input name="opacityThreshold" type="float" value="0" uimin="0.0" uimax="1.0" />
     <input name="ior" type="float" value="1.5" uimin="0.0" uisoftmin="1.0" uisoftmax="3.0" />
-    <input name="normal" type="vector3" value="0, 0, 1" />
+    <input name="normal" type="vector3" value="0, 0, 1" uimin="-1.0,-1.0,-1.0" uimax="1.0,1.0,1.0" uistep="0.01" />
     <input name="displacement" type="float" value="0" />
     <input name="occlusion" type="float" value="1" uimin="0.0" uimax="1.0" />
     <output name="out" type="surfaceshader" />
@@ -30,11 +30,11 @@
     <output name="g" type="float" />
     <output name="b" type="float" />
     <output name="a" type="float" />
-    <output name="rgb" type="color3" />  
+    <output name="rgb" type="color3" />
     <output name="rgba" type="color4" />
   </nodedef>
 
-<nodedef name="ND_UsdUVTexture_23" node="UsdUVTexture" nodegroup="texture2d" version="2.3" isdefaultversion="true">
+  <nodedef name="ND_UsdUVTexture_23" node="UsdUVTexture" nodegroup="texture2d" version="2.3" isdefaultversion="true">
     <input name="file" type="filename" value="" uniform="true" />
     <input name="st" type="vector2" defaultgeomprop="UV0" />
     <input name="wrapS" type="string" value="periodic" enum="black,clamp,periodic,mirror" uniform="true" />
@@ -267,13 +267,8 @@
     </uniform_edf>
 
     <!-- Surface Shader Constructor -->
-    <clamp name="opacity_clamped" type="float">
-      <input name="in" type="float" interfacename="opacity" />
-      <input name="low" type="float" value="0.00001" />
-      <input name="high" type="float" value="1.0" />
-    </clamp>
     <ifgreatereq name="cutout_opacity" type="float">
-      <input name="value1" type="float" nodename="opacity_clamped" />
+      <input name="value1" type="float" interfacename="opacity" />
       <input name="value2" type="float" interfacename="opacityThreshold" />
       <input name="in1" type="float" value="1" />
       <input name="in2" type="float" value="0" />

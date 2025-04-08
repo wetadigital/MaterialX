@@ -74,7 +74,7 @@ class MX_RENDER_API ShaderMaterial
     /// Generate a shader from our currently stored element and
     /// the given generator context.
     virtual bool generateShader(GenContext& context) = 0;
-    
+
     /// Copies shader and API specific generated program from ShaderMaterial to this one.
     virtual void copyShader(MaterialPtr ShaderMaterial) = 0;
 
@@ -86,7 +86,7 @@ class MX_RENDER_API ShaderMaterial
                                            const FilePath& filename,
                                            DocumentPtr stdLib,
                                            const FilePath& imagePath);
-    
+
     /// Return the underlying hardware shader.
     ShaderPtr getShader() const;
 
@@ -117,10 +117,6 @@ class MX_RENDER_API ShaderMaterial
     virtual void bindLighting(LightHandlerPtr lightHandler,
                               ImageHandlerPtr imageHandler,
                               const ShadowState& shadowState) = 0;
-
-    /// Bind units.
-    virtual void bindUnits(UnitConverterRegistryPtr& registry,
-                   const GenContext& context) = 0;
 
     /// Bind the given mesh to this ShaderMaterial.
     virtual void bindMesh(MeshPtr mesh) = 0;

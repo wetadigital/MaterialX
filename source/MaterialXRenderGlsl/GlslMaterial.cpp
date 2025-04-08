@@ -38,7 +38,7 @@ bool GlslMaterial::loadSource(const FilePath& vertexShaderFile, const FilePath& 
     }
 
     // TODO:
-    // Here we set new source code on the _glProgram without rebuilding 
+    // Here we set new source code on the _glProgram without rebuilding
     // the _hwShader instance. So the _hwShader is not in sync with the
     // _glProgram after this operation.
     _glProgram = GlslProgram::create();
@@ -209,7 +209,7 @@ ImagePtr GlslMaterial::bindImage(const FilePath& filePath, const std::string& un
     imageHandler->setFilenameResolver(resolver);
 
     // Acquire the given image.
-    ImagePtr image = imageHandler->acquireImage(filePath);
+    ImagePtr image = imageHandler->acquireImage(filePath, samplingProperties.defaultColor);
     if (!image)
     {
         return nullptr;
@@ -279,45 +279,6 @@ void GlslMaterial::bindLighting(LightHandlerPtr lightHandler, ImageHandlerPtr im
             }
         }
         _glProgram->bindUniform(HW::AMB_OCC_GAIN, Value::createValue(shadowState.ambientOcclusionGain));
-    }
-}
-
-void GlslMaterial::bindUnits(UnitConverterRegistryPtr& registry, const GenContext& context)
-{
-    if (!bindShader())
-    {
-        return;
-    }
-
-    ShaderPort* port = nullptr;
-    VariableBlock* publicUniforms = getPublicUniforms();
-    if (publicUniforms)
-    {
-        // Scan block based on unit name match predicate
-        port = publicUniforms->find(
-            [](ShaderPort* port)
-        {
-            return (port && (port->getName() == DISTANCE_UNIT_TARGET_NAME));
-        });
-
-        // Check if the uniform exists in the shader program
-        if (port && !_glProgram->getUniformsList().count(port->getVariable()))
-        {
-            port = nullptr;
-        }
-    }
-
-    if (port)
-    {
-        int intPortValue = registry->getUnitAsInteger(context.getOptions().targetDistanceUnit);
-        if (intPortValue >= 0)
-        {
-            port->setValue(Value::createValue(intPortValue));
-            if (_glProgram->hasUniform(DISTANCE_UNIT_TARGET_NAME))
-            {
-                _glProgram->bindUniform(DISTANCE_UNIT_TARGET_NAME, Value::createValue(intPortValue));
-            }
-        }
     }
 }
 
