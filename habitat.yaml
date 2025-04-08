@@ -7,9 +7,9 @@ Settings:
 
 Variables:
   # when branched for a release tag, update these
-  MATERIALX_TAG_VERSION: "1.38.7"
-  MATERIALX_VERSION: "1.38.7"
-  MATERIALX_CODESAFE_VERSION: "1_38_7"
+  MATERIALX_TAG_VERSION: "1.38.10"
+  MATERIALX_VERSION: "1.38.10"
+  MATERIALX_CODESAFE_VERSION: "1_38_10"
   MATERIALX_APP_VERSION: "${VERSION}"
   MATERIALX_SOVERSION: !Sub "${MATERIALX_TAG_VERSION}"
   MATERIALX_FULLSOVERSION: ${MATERIALX_APP_VERSION}
@@ -27,12 +27,12 @@ materialx_pak:
     LIBMATERIALX_INCLUDES: "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/include"
     MaterialX_ROOT: !Append "${INSTALL_PREFIX}/opt/%(WETA_VFXPLATFORM_ID)s/lib/cmake/MaterialX"
   Requires:
-    WetaVFXPlatform: ">=2019<2024"
+    WetaVFXPlatform: ">=2021<2024"
 
 
 compile_materialx:
   Type: Weta::OSS::CmakePackage
-  VariantsOverride: [ VP19, VP19DBG, VP20py2, VP20py2DBG, VP21, VP21DBG, VP22, VP22DBG, VP23, VP23DBG ]
+  VariantsOverride: [ VP21, VP21DBG, VP22, VP22DBG, VP23, VP23DBG ]
   BaseEnvironment:
     - cmake-3.27.7
     - ninja-1.10.2
@@ -43,12 +43,6 @@ compile_materialx:
     - graphviz-2.38.0
     - texlive-2018.04.14
   PerVariantBuildEnvironments:
-    VP19*:
-      - python-2.7.15-weta.5
-      - WetaVFXPlatform-2019.27.10
-    VP20*:
-      - python-2.7.15-weta.5
-      - WetaVFXPlatform-2020.27.8
     VP21*:
       - python-3.7.3-weta.1
       - pyimportlib_metadata-4.8.1
@@ -61,24 +55,6 @@ compile_materialx:
       - python-3.10.13
       - WetaVFXPlatform-2023.0.4
   PerVariantVariables:
-    VP19*:
-      BOB_ABI: L64
-      OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
-    VP19:
-      BLDTAG: opt
-      GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
-    VP19DBG:
-      BLDTAG: dbg
-      GENDOCS: OFF
-    VP20*:
-      BOB_ABI: L64
-      OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
-    VP20py2:
-      BLDTAG: opt
-      GENDOCS: !If [!Equals [!Sub "${Project:IsDeployment}", "True"], "ON", "OFF"]
-    VP20py2DBG:
-      BLDTAG: dbg
-      GENDOCS: OFF
     VP21*:
       BOB_ABI: L94
       OIIO_LOCATION: !Sub "/vol/bob/built/linux64/${BOB_ABI}/ext/OpenImageIO/tags/OpenImageIO-2.2-16.0-weta04"
