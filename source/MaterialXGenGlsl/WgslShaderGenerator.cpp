@@ -64,4 +64,22 @@ void WgslShaderGenerator::emitInput(const ShaderInput* input, GenContext& contex
     }
 }
 
+void WgslShaderGenerator::emitTransmissionRender(GenContext& context, ShaderStage& stage) const
+{
+    int transmissionMethod = context.getOptions().hwTransmissionRenderMethod;
+    if (transmissionMethod == TRANSMISSION_REFRACTION)
+    {
+        emitLibraryInclude("pbrlib/genglsl/lib/mx_transmission_refract.wgsl", context, stage);
+    }
+    else if (transmissionMethod == TRANSMISSION_OPACITY)
+    {
+        emitLibraryInclude("pbrlib/genglsl/lib/mx_transmission_opacity.glsl", context, stage);
+    }
+    else
+    {
+        throw ExceptionShaderGenError("Invalid transmission render specified: '" + std::to_string(transmissionMethod) + "'");
+    }
+    emitLineBreak(stage);
+}
+
 MATERIALX_NAMESPACE_END

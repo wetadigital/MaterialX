@@ -7,6 +7,24 @@
 
 MATERIALX_NAMESPACE_BEGIN
 
+class WslBooleanTypeSyntax : public ScalarTypeSyntax
+{
+  public:
+    WslBooleanTypeSyntax(const Syntax* parent) :
+        ScalarTypeSyntax(parent, "bool", "false", "false", EMPTY_STRING, EMPTY_STRING)
+    {
+    }
+
+    string getValue(const Value& value, bool uniform) const override
+    {
+        if ( uniform )
+        {
+            return value.asA<bool>() ? "1" : "0";
+        }
+        return value.getValueString();
+    }
+};
+
 WgslSyntax::WgslSyntax(TypeSystemPtr typeSystem) : VkSyntax(typeSystem)
 {
     // Add in WGSL specific keywords
@@ -186,6 +204,10 @@ WgslSyntax::WgslSyntax(TypeSystemPtr typeSystem) : VkSyntax(typeSystem)
         "writeonly",
         "yield"        
     	} );
+
+    registerTypeSyntax(
+        Type::BOOLEAN,
+        std::make_shared<WslBooleanTypeSyntax>(this));
 }
 
 

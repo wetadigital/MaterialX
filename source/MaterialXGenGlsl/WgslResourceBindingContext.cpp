@@ -5,6 +5,8 @@
 
 #include <MaterialXGenGlsl/WgslResourceBindingContext.h>
 
+#include <iostream>
+
 MATERIALX_NAMESPACE_BEGIN
 
 //
@@ -43,6 +45,12 @@ void WgslResourceBindingContext::emitResourceBindings(GenContext& context, const
         {
             if (uniform->getType() != Type::FILENAME)
             {
+                if ( uniform->getType() == Type::BOOLEAN )
+                {
+                    // Cannot have boolean uniforms in WGSL
+                    uniform->setType( Type::INTEGER );
+                    std::cerr << "Warning: WGSL does not allow boolean types to be stored in uniform or storage address spaces. Conditionals using this variable may not work." << std::endl;
+                }
                 generator.emitLineBegin(stage);
                 generator.emitVariableDeclaration(uniform, EMPTY_STRING, context, stage, false);
                 generator.emitString(Syntax::SEMICOLON, stage);
